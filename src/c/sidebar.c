@@ -88,21 +88,6 @@ void Sidebar_updateTime(struct tm* timeInfo) {
   SidebarWidgets_updateTime(timeInfo);
 }
 
-bool isAutoBatteryShown() {
-  if(!globalSettings.disableAutobattery) {
-    BatteryChargeState chargeState = battery_state_service_peek();
-
-    if(globalSettings.enableAutoBatteryWidget) {
-      if(chargeState.charge_percent <= 10 || chargeState.is_charging) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-
 #ifdef PBL_ROUND
 
 // returns the best candidate widget for replacement by the auto battery
@@ -142,19 +127,7 @@ void updateRoundSidebarRight(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_bounds(l);
   GRect bgBounds = GRect(bounds.origin.x, bounds.size.h / -2, bounds.size.h * 2, bounds.size.h * 2);
 
-  bool showDisconnectIcon = !bluetooth_connection_service_peek();
-  bool showAutoBattery = isAutoBatteryShown();
-
   SidebarWidgetType displayWidget = globalSettings.widgets[2];
-
-  if((showAutoBattery || showDisconnectIcon) && getReplacableWidget() == 2) {
-    if(showAutoBattery) {
-      displayWidget = BATTERY_METER;
-    } else if(showDisconnectIcon) {
-      displayWidget = BLUETOOTH_DISCONNECT;
-    }
-  }
-
   drawRoundSidebar(ctx, bgBounds, displayWidget, 3);
 }
 
@@ -162,18 +135,7 @@ void updateRoundSidebarLeft(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_bounds(l);
   GRect bgBounds = GRect(bounds.origin.x - bounds.size.h * 2 + bounds.size.w, bounds.size.h / -2, bounds.size.h * 2, bounds.size.h * 2);
 
-  bool showDisconnectIcon = !bluetooth_connection_service_peek();
-  bool showAutoBattery = isAutoBatteryShown();
   SidebarWidgetType displayWidget = globalSettings.widgets[0];
-
-  if((showAutoBattery || showDisconnectIcon) && getReplacableWidget() == 0) {
-    if(showAutoBattery) {
-      displayWidget = BATTERY_METER;
-    } else if(showDisconnectIcon) {
-      displayWidget = BLUETOOTH_DISCONNECT;
-    }
-  }
-
   drawRoundSidebar(ctx, bgBounds, displayWidget, 7);
 }
 
@@ -212,40 +174,16 @@ void updateRectSidebar(Layer *l, GContext* ctx) {
 
   graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
 
-  bool showDisconnectIcon = false;
-  bool showAutoBattery = isAutoBatteryShown();
-
-  // if the pebble is disconnected and activated, show the disconnect icon
-  if(globalSettings.activateDisconnectIcon) {
-    showDisconnectIcon = !bluetooth_connection_service_peek();
-  }
-
   SidebarWidget displayWidgets[3];
 
   displayWidgets[0] = getSidebarWidgetByType(globalSettings.widgets[0]);
   displayWidgets[1] = getSidebarWidgetByType(globalSettings.widgets[1]);
   displayWidgets[2] = getSidebarWidgetByType(globalSettings.widgets[2]);
 
-  // do we need to replace a widget?
-  // if so, determine which widget should be replaced
-  if(showAutoBattery || showDisconnectIcon) {
-    int widget_to_replace = getReplacableWidget();
-
-    if(showAutoBattery) {
-      displayWidgets[widget_to_replace] = getSidebarWidgetByType(BATTERY_METER);
-    } else if(showDisconnectIcon) {
-      displayWidgets[widget_to_replace] = getSidebarWidgetByType(BLUETOOTH_DISCONNECT);
-    }
-  }
-
-  // if the widgets are too tall, enable "compact mode"
   int compact_mode_threshold = bounds.size.h - V_PADDING_DEFAULT * 2 - 3;
   int v_padding = V_PADDING_DEFAULT;
 
-  SidebarWidgets_useCompactMode = false; // ensure that we compare the non-compacted heights
   int totalHeight = displayWidgets[0].getHeight() + displayWidgets[1].getHeight() + displayWidgets[2].getHeight();
-  SidebarWidgets_useCompactMode = (totalHeight > compact_mode_threshold);
-  // printf("Total Height: %i, Threshold: %i", totalHeight, compact_mode_threshold);
 
   // now that they have been compacted, check if they fit a second time,
   // if they still don't fit, our only choice is MURDER (of the middle widget)

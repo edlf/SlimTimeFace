@@ -4,7 +4,6 @@
 #include "util.h"
 #include "sidebar_widgets.h"
 
-bool SidebarWidgets_useCompactMode = false;
 int SidebarWidgets_xOffset;
 
 // sidebar icons
@@ -130,7 +129,6 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
 
   graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
 
-  char batteryString[6];
   int batteryPositionY = yPosition - 5; // correct for vertical empty space on battery icon
 
   if (batteryImage) {
@@ -162,7 +160,7 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
 
 /********** current date widget **********/
 int DateWidget_getHeight() {
-  return (SidebarWidgets_useCompactMode) ? 41 : 58;
+  return 41;
 }
 
 void DateWidget_draw(GContext* ctx, int yPosition) {
@@ -192,7 +190,6 @@ void DateWidget_draw(GContext* ctx, int yPosition) {
                      GTextAlignmentCenter,
                      NULL);
 
-
   // switch back to normal color for the rest
   graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
 }
@@ -203,10 +200,8 @@ int BTDisconnect_getHeight() {
 }
 
 void BTDisconnect_draw(GContext* ctx, int yPosition) {
-  if(disconnectImage) {
+  if(!bluetooth_connection_service_peek()) {
     gdraw_command_image_recolor(disconnectImage, globalSettings.iconFillColor, globalSettings.iconStrokeColor);
-
-
     gdraw_command_image_draw(ctx, disconnectImage, GPoint(3 + SidebarWidgets_xOffset, yPosition));
   }
 }

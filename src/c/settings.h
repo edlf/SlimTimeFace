@@ -18,13 +18,6 @@ typedef struct {
 
   // sidebar settings
   SidebarWidgetType widgets[3];
-  bool activateDisconnectIcon;
-
-  // battery meter widget settings
-  bool disableAutobattery;
-
-  // dynamic settings (calculated based the currently-selected widgets)
-  bool enableAutoBatteryWidget;
 
   // TODO: these shouldn't be dynamic
   GColor iconFillColor;

@@ -4,15 +4,6 @@
 Settings globalSettings;
 
 void Settings_updateDynamicSettings() {
-  globalSettings.enableAutoBatteryWidget = true;
-
-  for(int i = 0; i < 3; i++) {
-    // if any widget is "battery", disable the automatic battery indication
-    if(globalSettings.widgets[i] == BATTERY_METER) {
-      globalSettings.enableAutoBatteryWidget = false;
-    }
-  }
-
   // temp: if the sidebar is black, use inverted colors for icons
   if(gcolor_equal(globalSettings.sidebarColor, GColorBlack)) {
     globalSettings.iconFillColor = GColorBlack;
@@ -25,23 +16,23 @@ void Settings_updateDynamicSettings() {
 
 void Settings_init() {
   // load the default colors
-  globalSettings.timeBgColor      = GColorBlack;
-  globalSettings.sidebarTextColor = GColorBlack;
+  globalSettings.timeBgColor      = GColorWhite;
+  globalSettings.sidebarTextColor = GColorWhite;
 
   #ifdef PBL_COLOR
     globalSettings.timeColor      = GColorOrange;
     globalSettings.sidebarColor   = GColorOrange;
   #else
-    globalSettings.timeColor      = GColorWhite;
-    globalSettings.sidebarColor   = GColorLightGray;
+    globalSettings.timeColor      = GColorBlack;
+    globalSettings.sidebarColor   = GColorBlack;
   #endif
+
+  globalSettings.showLeadingZero = true;
 
   // set the default widgets
   globalSettings.widgets[0] = BATTERY_METER;
   globalSettings.widgets[1] = BLUETOOTH_DISCONNECT;
   globalSettings.widgets[2] = DATE;
 
-  // set default disconnect icon activation
-  globalSettings.activateDisconnectIcon = true;
   Settings_updateDynamicSettings();
 }

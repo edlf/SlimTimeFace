@@ -1,7 +1,6 @@
 #include <pebble.h>
 #include <math.h>
 #include "settings.h"
-#include "languages.h"
 #include "util.h"
 #include "sidebar_widgets.h"
 
@@ -24,11 +23,6 @@ GFont batteryFont;
 // the date and time strings
 char currentDayNum[3];
 char currentWeekNum[3];
-char currentSecondsNum[4];
-
-char currentDayName[8];
-char currentMonth[8];
-
 char altClock[8];
 
 // the widgets
@@ -47,18 +41,6 @@ void DateWidget_draw(GContext* ctx, int yPosition);
 SidebarWidget btDisconnectWidget;
 int BTDisconnect_getHeight();
 void BTDisconnect_draw(GContext* ctx, int yPosition);
-
-SidebarWidget weekNumberWidget;
-int WeekNumber_getHeight();
-void WeekNumber_draw(GContext* ctx, int yPosition);
-
-SidebarWidget secondsWidget;
-int Seconds_getHeight();
-void Seconds_draw(GContext* ctx, int yPosition);
-
-SidebarWidget altTimeWidget;
-int AltTime_getHeight();
-void AltTime_draw(GContext* ctx, int yPosition);
 
 void SidebarWidgets_init() {
   // load fonts
@@ -84,15 +66,6 @@ void SidebarWidgets_init() {
 
   btDisconnectWidget.getHeight = BTDisconnect_getHeight;
   btDisconnectWidget.draw      = BTDisconnect_draw;
-
-  weekNumberWidget.getHeight = WeekNumber_getHeight;
-  weekNumberWidget.draw      = WeekNumber_draw;
-
-  secondsWidget.getHeight = Seconds_getHeight;
-  secondsWidget.draw      = Seconds_draw;
-
-  altTimeWidget.getHeight = AltTime_getHeight;
-  altTimeWidget.draw      = AltTime_draw;
 }
 
 void SidebarWidgets_deinit() {
@@ -103,20 +76,8 @@ void SidebarWidgets_deinit() {
 }
 
 void SidebarWidgets_updateFonts() {
-  if(globalSettings.useLargeFonts) {
-    currentSidebarFont = lgSidebarFont;
-    batteryFont = lgSidebarFont;
-  } else {
-    currentSidebarFont = mdSidebarFont;
-    batteryFont = smSidebarFont;
-  }
-}
-
-// c can't do true modulus on negative numbers, apparently
-// from http://stackoverflow.com/questions/11720656/modulo-operation-with-negative-numbers
-int mod(int a, int b) {
-    int r = a % b;
-    return r < 0 ? r + b : r;
+  currentSidebarFont = mdSidebarFont;
+  batteryFont = smSidebarFont;
 }
 
 void SidebarWidgets_updateTime(struct tm* timeInfo) {
@@ -129,39 +90,6 @@ void SidebarWidgets_updateTime(struct tm* timeInfo) {
   }
 
   strftime(currentWeekNum, sizeof(currentWeekNum), "%V", timeInfo);
-
-  strncpy(currentDayName, dayNames[globalSettings.languageId][timeInfo->tm_wday], sizeof(currentDayName));
-  strncpy(currentMonth, monthNames[globalSettings.languageId][timeInfo->tm_mon], sizeof(currentMonth));
-
-  // set the seconds string
-  strftime(currentSecondsNum, sizeof(currentSecondsNum), ":%S", timeInfo);
-
-  if(globalSettings.enableAltTimeZone) {
-    // set the alternate time zone string
-    int hour = timeInfo->tm_hour;
-
-    // apply the configured offset value
-    hour += globalSettings.altclockOffset;
-
-    char am_pm = (mod(hour, 24) < 12) ? 'a' : 'p';
-
-    // format it
-    if(clock_is_24h_style()) {
-      hour = mod(hour, 24);
-      am_pm = (char) 0;
-    } else {
-      hour = mod(hour, 12);
-      if(hour == 0) {
-        hour = 12;
-      }
-    }
-
-    if(globalSettings.showLeadingZero && hour < 10) {
-      snprintf(altClock, sizeof(altClock), "0%i%c", hour, am_pm);
-    } else {
-      snprintf(altClock, sizeof(altClock), "%i%c", hour, am_pm);
-    }
-  }
 }
 
 /* Sidebar Widget Selection */
@@ -175,15 +103,6 @@ SidebarWidget getSidebarWidgetByType(SidebarWidgetType type) {
 
     case DATE:
       return dateWidget;
-
-    case ALT_TIME_ZONE:
-      return altTimeWidget;
-
-    case SECONDS:
-      return secondsWidget;
-
-    case WEEK_NUMBER:
-      return weekNumberWidget;
 
     default:
       return emptyWidget;
@@ -201,13 +120,7 @@ void EmptyWidget_draw(GContext* ctx, int yPosition) {
 
 /********** functions for the battery meter widget **********/
 int BatteryMeter_getHeight() {
-  BatteryChargeState chargeState = battery_state_service_peek();
-
-  if(chargeState.is_charging || !globalSettings.showBatteryPct) {
-    return 14; // graphic only height
-  } else {
-    return (globalSettings.useLargeFonts) ? 33 : 27; // heights with text
-  }
+  return 14;
 }
 
 void BatteryMeter_draw(GContext* ctx, int yPosition) {
@@ -245,81 +158,31 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
 
     graphics_fill_rect(ctx, GRect(6 + SidebarWidgets_xOffset, 8 + batteryPositionY, width, 8), 0, GCornerNone);
   }
-
-  // never show battery % while charging, because of this issue:
-  // https://github.com/freakified/TimeStylePebble/issues/11
-  if(globalSettings.showBatteryPct && !chargeState.is_charging) {
-    if(!globalSettings.useLargeFonts) {
-      // put the percent sign on the opposite side if turkish
-      snprintf(batteryString, sizeof(batteryString),
-               (globalSettings.languageId == LANGUAGE_TR) ? "%%%d" : "%d%%",
-               battery_percent);
-
-      graphics_draw_text(ctx,
-                         batteryString,
-                         batteryFont,
-                         GRect(-4 + SidebarWidgets_xOffset, 18 + batteryPositionY, 38, 20),
-                         GTextOverflowModeFill,
-                         GTextAlignmentCenter,
-                         NULL);
-    } else {
-      snprintf(batteryString, sizeof(batteryString), "%d", battery_percent);
-
-      graphics_draw_text(ctx,
-                         batteryString,
-                         batteryFont,
-                         GRect(-4 + SidebarWidgets_xOffset, 14 + batteryPositionY, 38, 20),
-                         GTextOverflowModeFill,
-                         GTextAlignmentCenter,
-                         NULL);
-    }
-  }
 }
 
 /********** current date widget **********/
 int DateWidget_getHeight() {
-  if(globalSettings.useLargeFonts) {
-    return (SidebarWidgets_useCompactMode) ? 42 : 62;
-  } else  {
-    return (SidebarWidgets_useCompactMode) ? 41 : 58;
-  }
+  return (SidebarWidgets_useCompactMode) ? 41 : 58;
 }
 
 void DateWidget_draw(GContext* ctx, int yPosition) {
   graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
 
   // compensate for extra space that appears on the top of the date widget
-  yPosition -= (globalSettings.useLargeFonts) ? 10 : 7;
-
-  // first draw the day name
-  graphics_draw_text(ctx,
-                     currentDayName,
-                     currentSidebarFont,
-                     GRect(-5 + SidebarWidgets_xOffset, yPosition, 40, 20),
-                     GTextOverflowModeFill,
-                     GTextAlignmentCenter,
-                     NULL);
+  yPosition -= 7;
 
   // next, draw the date background
   // (an image in normal mode, a rectangle in large font mode)
-  if(!globalSettings.useLargeFonts) {
-    if(dateImage) {
-      gdraw_command_image_recolor(dateImage, globalSettings.iconFillColor, globalSettings.iconStrokeColor);
-      gdraw_command_image_draw(ctx, dateImage, GPoint(3 + SidebarWidgets_xOffset, yPosition + 23));
-    }
-  } else {
-    graphics_context_set_fill_color(ctx, globalSettings.iconStrokeColor);
-    graphics_fill_rect(ctx, GRect(2 + SidebarWidgets_xOffset, yPosition + 30, 26, 22), 2, GCornersAll);
-
-    graphics_context_set_fill_color(ctx, globalSettings.iconFillColor);
-    graphics_fill_rect(ctx, GRect(4 + SidebarWidgets_xOffset, yPosition + 32, 22, 18), 0, GCornersAll);
+  if(dateImage) {
+    gdraw_command_image_recolor(dateImage, globalSettings.iconFillColor, globalSettings.iconStrokeColor);
+    gdraw_command_image_draw(ctx, dateImage, GPoint(3 + SidebarWidgets_xOffset, yPosition + 23));
   }
 
   // next, draw the date number
   graphics_context_set_text_color(ctx, globalSettings.iconStrokeColor);
 
   int yOffset = 0;
-  yOffset = globalSettings.useLargeFonts ? 24 : 26;
+  yOffset = 26;
 
   graphics_draw_text(ctx,
                      currentDayNum,
@@ -330,22 +193,8 @@ void DateWidget_draw(GContext* ctx, int yPosition) {
                      NULL);
 
 
-   // switch back to normal color for the rest
+  // switch back to normal color for the rest
   graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
-
-  // don't draw the month if we're in compact mode
-  if(!SidebarWidgets_useCompactMode) {
-    yOffset = globalSettings.useLargeFonts ? 48 : 47;
-
-    graphics_draw_text(ctx,
-                       currentMonth,
-                       currentSidebarFont,
-                       GRect(-5 + SidebarWidgets_xOffset, yPosition + yOffset, 40, 20),
-                       GTextOverflowModeFill,
-                       GTextAlignmentCenter,
-                       NULL);
-  }
-
 }
 
 /***** Bluetooth Disconnection Widget *****/
@@ -360,85 +209,4 @@ void BTDisconnect_draw(GContext* ctx, int yPosition) {
 
     gdraw_command_image_draw(ctx, disconnectImage, GPoint(3 + SidebarWidgets_xOffset, yPosition));
   }
-}
-
-/***** Week Number Widget *****/
-int WeekNumber_getHeight() {
-  return (globalSettings.useLargeFonts) ? 29 : 26;
-}
-
-void WeekNumber_draw(GContext* ctx, int yPosition) {
-  graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
-
-  // note that it draws "above" the y position to correct for
-  // the vertical padding
-  graphics_draw_text(ctx,
-                     wordForWeek[globalSettings.languageId],
-                     smSidebarFont,
-                     GRect(-4 + SidebarWidgets_xOffset, yPosition - 4, 38, 20),
-                     GTextOverflowModeFill,
-                     GTextAlignmentCenter,
-                     NULL);
-
-  if(!globalSettings.useLargeFonts) {
-    graphics_draw_text(ctx,
-                       currentWeekNum,
-                       mdSidebarFont,
-                       GRect(0 + SidebarWidgets_xOffset, yPosition + 9, 30, 20),
-                       GTextOverflowModeFill,
-                       GTextAlignmentCenter,
-                       NULL);
-  } else {
-    graphics_draw_text(ctx,
-                       currentWeekNum,
-                       lgSidebarFont,
-                       GRect(0 + SidebarWidgets_xOffset, yPosition + 6, 30, 20),
-                       GTextOverflowModeFill,
-                       GTextAlignmentCenter,
-                       NULL);
-  }
-}
-
-/***** Seconds Widget *****/
-int Seconds_getHeight() {
-  return 14;
-}
-
-void Seconds_draw(GContext* ctx, int yPosition) {
-  graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
-
-  graphics_draw_text(ctx,
-                     currentSecondsNum,
-                     lgSidebarFont,
-                     GRect(0 + SidebarWidgets_xOffset, yPosition - 10, 30, 20),
-                     GTextOverflowModeFill,
-                     GTextAlignmentCenter,
-                     NULL);
-}
-
-/***** Alternate Time Zone Widget *****/
-int AltTime_getHeight() {
-  return (globalSettings.useLargeFonts) ? 29 : 26;
-}
-
-void AltTime_draw(GContext* ctx, int yPosition) {
-  graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
-
-  graphics_draw_text(ctx,
-                     globalSettings.altclockName,
-                     smSidebarFont,
-                     GRect(0 + SidebarWidgets_xOffset, yPosition - 5, 30, 20),
-                     GTextOverflowModeFill,
-                     GTextAlignmentCenter,
-                     NULL);
-
-  int yMod = (globalSettings.useLargeFonts) ? 5 : 8;
-
-  graphics_draw_text(ctx,
-                     altClock,
-                     currentSidebarFont,
-                     GRect(-1 + SidebarWidgets_xOffset, yPosition + yMod, 30, 20),
-                     GTextOverflowModeFill,
-                     GTextAlignmentCenter,
-                     NULL);
 }

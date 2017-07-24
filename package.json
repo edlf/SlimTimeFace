@@ -1,5 +1,5 @@
 {
-  "name": "timestyle-pebble-slim",
+  "name": "slim-time-face",
   "author": "Freakified, edlf",
   "version": "1.0.0",
   "keywords": [
@@ -7,48 +7,24 @@
   ],
   "private": true,
   "dependencies": {
-    "pebble-fctx": "^1.4.0"
+    "pebble-fctx": "^1.6.2"
   },
   "pebble": {
-    "displayName": "TimeStyleSlim",
-    "uuid": "CA43E11F-47C9-4263-AF0D-F3D2116B6C1C",
+    "displayName": "SlimTimeFace",
+    "uuid": "17413140-ee58-4a11-bd47-d6bbb171c25c",
     "sdkVersion": "3",
-    "enableMultiJS": true,
+    "enableMultiJS": false,
     "targetPlatforms": [
       "basalt",
       "chalk",
       "diorite",
       "emery"
     ],
-    "capabilities": [
-      "configurable"
-    ],
     "watchapp": {
       "onlyShownOnCommunication": false,
       "hiddenApp": false,
       "watchface": true
     },
-    "messageKeys": [
-      "SettingAltClockName",
-      "SettingAltClockOffset",
-      "SettingDisableAutobattery",
-      "SettingBluetoothVibe",
-      "SettingDisconnectIcon",
-      "SettingClockFontId",
-      "SettingColorBG",
-      "SettingColorSidebar",
-      "SettingColorTime",
-      "SettingHourlyVibe",
-      "SettingLanguageID",
-      "SettingShowBatteryPct",
-      "SettingShowLeadingZero",
-      "SettingSidebarOnLeft",
-      "SettingSidebarTextColor",
-      "SettingUseLargeFonts",
-      "SettingWidget0ID",
-      "SettingWidget1ID",
-      "SettingWidget2ID"
-    ],
     "resources": {
       "media": [
         {

@@ -2,7 +2,6 @@
 #include <ctype.h>
 #include <math.h>
 #include "settings.h"
-#include "languages.h"
 #include "sidebar.h"
 #include "sidebar_widgets.h"
 
@@ -40,11 +39,7 @@ void Sidebar_init(Window* window) {
     bounds = GRect(0, 0, 40, screen_rect.size.h);
     bounds2 = GRect(screen_rect.size.w - 40, 0, 40, screen_rect.size.h);
   #else
-    if(!globalSettings.sidebarOnLeft) {
-      bounds = GRect(screen_rect.size.w - ACTION_BAR_WIDTH, 0, ACTION_BAR_WIDTH, screen_rect.size.h);
-    } else {
-      bounds = GRect(0, 0, ACTION_BAR_WIDTH, screen_rect.size.h);
-    }
+    bounds = GRect(screen_rect.size.w - ACTION_BAR_WIDTH, 0, ACTION_BAR_WIDTH, screen_rect.size.h);
   #endif
 
   // init the widgets
@@ -78,12 +73,7 @@ void Sidebar_deinit() {
 
 void Sidebar_redraw() {
   #ifndef PBL_ROUND
-    // reposition the sidebar if needed
-    if(!globalSettings.sidebarOnLeft) {
-      layer_set_frame(sidebarLayer, GRect(screen_rect.size.w - ACTION_BAR_WIDTH, 0, ACTION_BAR_WIDTH, screen_rect.size.h));
-    } else {
-      layer_set_frame(sidebarLayer, GRect(0, 0, ACTION_BAR_WIDTH, screen_rect.size.h));
-    }
+    layer_set_frame(sidebarLayer, GRect(screen_rect.size.w - ACTION_BAR_WIDTH, 0, ACTION_BAR_WIDTH, screen_rect.size.h));
   #endif
 
   // redraw the layer

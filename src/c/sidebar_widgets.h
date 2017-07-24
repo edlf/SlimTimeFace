@@ -22,11 +22,7 @@ typedef enum {
   EMPTY                     = 0,
   BLUETOOTH_DISCONNECT      = 1,
   BATTERY_METER             = 2,
-  ALT_TIME_ZONE             = 3,
-  DATE                      = 4,
-  SECONDS                   = 5,
-  WEEK_NUMBER               = 6,
-  TIME_UNUSED               = 7
+  DATE                      = 3
 } SidebarWidgetType;
 
 typedef struct {

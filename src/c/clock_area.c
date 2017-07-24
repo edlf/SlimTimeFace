@@ -69,7 +69,6 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
   int h_adjust = 0;
   int v_adjust = 0;
 
-
   #ifdef PBL_COLOR
     fctx_enable_aa(true);
   #endif
@@ -80,11 +79,7 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
     h_adjust = -1;
   #else
     // for rectangular watches, adjust X position based on sidebar position
-    if(globalSettings.sidebarOnLeft) {
-      h_adjust += ACTION_BAR_WIDTH / 2;
-    } else {
-      h_adjust -= ACTION_BAR_WIDTH / 2 + 1;
-    }
+    h_adjust -= ACTION_BAR_WIDTH / 2 + 1;
   #endif
 
   FPoint time_pos;

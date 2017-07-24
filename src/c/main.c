@@ -1,6 +1,5 @@
 #include <pebble.h>
 #include "clock_area.h"
-#include "messaging.h"
 #include "settings.h"
 #include "sidebar.h"
 #include "util.h"
@@ -12,9 +11,6 @@ GRect screen_rect;
 
 // current bluetooth state
 static bool isPhoneConnected;
-
-// current time service subscription
-static bool updatingEverySecond;
 
 void update_clock() {
   time_t rawTime;
@@ -28,21 +24,6 @@ void update_clock() {
 }
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  // every hour, if requested, vibrate
-  if(!quiet_time_is_active() && tick_time->tm_sec == 0) {
-    if(globalSettings.hourlyVibe == VIBE_EVERY_HOUR) { // hourly vibes only
-      if(tick_time->tm_min == 0) {
-        vibes_double_pulse();
-      }
-    } else if(globalSettings.hourlyVibe == VIBE_EVERY_HALF_HOUR) {  // hourly and half-hourly
-      if(tick_time->tm_min == 0) {
-        vibes_double_pulse();
-      } else if(tick_time->tm_min == 30) {
-        vibes_short_pulse();
-      }
-    }
-  }
-
   update_clock();
 
   // redraw all screen
@@ -52,20 +33,6 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 /* forces everything on screen to be redrawn -- perfect for keeping track of settings! */
 void redrawScreen() {
-
-  // check if the tick handler frequency should be changed
-  if(globalSettings.updateScreenEverySecond != updatingEverySecond) {
-    tick_timer_service_unsubscribe();
-
-    if(globalSettings.updateScreenEverySecond) {
-      tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
-      updatingEverySecond = true;
-    } else {
-      tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-      updatingEverySecond = false;
-    }
-  }
-
   window_set_background_color(mainWindow, globalSettings.timeBgColor);
 
   // maybe the language changed!
@@ -73,7 +40,6 @@ void redrawScreen() {
 
   // update the sidebar
   Sidebar_redraw();
-
   ClockArea_redraw();
 }
 
@@ -82,7 +48,6 @@ static void main_window_load(Window *window) {
 
   // create the sidebar
   Sidebar_init(window);
-
   ClockArea_init(window);
 
   // Make sure the time is displayed from the start
@@ -137,9 +102,6 @@ static void init() {
   // init settings
   Settings_init();
 
-  // init the messaging thing
-  messaging_init(redrawScreen);
-
   // Create main Window element and assign to pointer
   mainWindow = window_create();
 
@@ -155,13 +117,7 @@ static void init() {
   windowLayer = window_get_root_layer(mainWindow);
 
   // Register with TickTimerService
-  if(globalSettings.updateScreenEverySecond) {
-    tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
-    updatingEverySecond = true;
-  } else {
-    tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-    updatingEverySecond = false;
-  }
+  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 
   bool connected = bluetooth_connection_service_peek();
   bluetoothStateChanged(connected);
@@ -180,8 +136,6 @@ static void init() {
 static void deinit() {
   // Destroy Window
   window_destroy(mainWindow);
-
-  Settings_deinit();
 
   tick_timer_service_unsubscribe();
   bluetooth_connection_service_unsubscribe();

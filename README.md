@@ -7,4 +7,4 @@ A stylish, modern watchface for the Pebble and Pebble Time watches. This is base
 Sorry this is supposed to be a non configurable watch face without any extra frills. What you see is what you get.
 
 ## Want to try it?
-You must sideload it, since it is not on the Pebble store. There is no configuration service yet. A build is available on the releases page.
+You must sideload it, since it is not on the Pebble store. A build is available on the releases page.

@@ -48,9 +48,6 @@ void Sidebar_updateTime(struct tm* timeInfo) {
 void updateRectSidebar(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_unobstructed_bounds(l);
 
-  // this ends up being zero on every rectangular platform besides emery
-  SidebarWidgets_xOffset = (ACTION_BAR_WIDTH - 30) / 2;
-
   SidebarWidgets_updateFonts();
 
   graphics_context_set_fill_color(ctx, SIDEBAR_BG_COLOR);
@@ -58,15 +55,14 @@ void updateRectSidebar(Layer *l, GContext* ctx) {
 
   graphics_context_set_text_color(ctx, SIDEBAR_COLOR);
 
-  // calculate the three widget positions
-  int topWidgetPos = V_PADDING_DEFAULT;
+  // calculate the widget positions
   int lowerWidgetPos = bounds.size.h - V_PADDING_DEFAULT - WIDGET_2.getHeight();
 
   // vertically center the middle widget using MATH
-  int middleWidgetPos = ((lowerWidgetPos - WIDGET_1.getHeight()) + (topWidgetPos + WIDGET_0.getHeight())) / 2;
+  int middleWidgetPos = (bounds.size.h - WIDGET_1.getHeight())/ 2;
 
   // draw the widgets
-  WIDGET_0.draw(ctx, topWidgetPos);
+  WIDGET_0.draw(ctx, V_PADDING_DEFAULT);
   WIDGET_1.draw(ctx, middleWidgetPos);
   WIDGET_2.draw(ctx, lowerWidgetPos);
 }

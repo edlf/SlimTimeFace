@@ -3,10 +3,7 @@
 #include "util.h"
 #include "sidebar_widgets.h"
 
-int SidebarWidgets_xOffset;
-
 // sidebar icons
-GDrawCommandImage* dateImage;
 GDrawCommandImage* disconnectImage;
 GDrawCommandImage* batteryImage;
 GDrawCommandImage* batteryChargeImage;
@@ -43,7 +40,6 @@ void SidebarWidgets_init() {
   lgSidebarFont = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
 
   // load the sidebar graphics
-  dateImage = gdraw_command_image_create_with_resource(RESOURCE_ID_DATE_BG);
   disconnectImage = gdraw_command_image_create_with_resource(RESOURCE_ID_DISCONNECTED);
   batteryImage = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_BG);
   batteryChargeImage = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_CHARGE);
@@ -60,7 +56,6 @@ void SidebarWidgets_init() {
 }
 
 void SidebarWidgets_deinit() {
-  gdraw_command_image_destroy(dateImage);
   gdraw_command_image_destroy(disconnectImage);
   gdraw_command_image_destroy(batteryImage);
   gdraw_command_image_destroy(batteryChargeImage);
@@ -126,38 +121,19 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
 
 /********** current date widget **********/
 int DateWidget_getHeight() {
-  return 41;
+  return 18;
 }
 
 void DateWidget_draw(GContext* ctx, int yPosition) {
-  graphics_context_set_text_color(ctx, SIDEBAR_BG_COLOR);
-
-  // compensate for extra space that appears on the top of the date widget
-  yPosition -= 7;
-
-  // next, draw the date background
-  // (an image in normal mode, a rectangle in large font mode)
-  if(dateImage) {
-    gdraw_command_image_recolor(dateImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
-    gdraw_command_image_draw(ctx, dateImage, GPoint(3 + SidebarWidgets_xOffset, yPosition + 23));
-  }
-
-  // next, draw the date number
   graphics_context_set_text_color(ctx, SIDEBAR_COLOR);
-
-  int yOffset = 0;
-  yOffset = 26;
 
   graphics_draw_text(ctx,
                      currentDayNum,
                      currentSidebarFont,
-                     GRect(-5 + SidebarWidgets_xOffset, yPosition + yOffset, 40, 20),
+                     GRect(-5 + SidebarWidgets_xOffset, yPosition, 40, 20),
                      GTextOverflowModeFill,
                      GTextAlignmentCenter,
                      NULL);
-
-  // switch back to normal color for the rest
-  graphics_context_set_text_color(ctx, SIDEBAR_BG_COLOR);
 }
 
 /***** Bluetooth Disconnection Widget *****/
@@ -166,8 +142,8 @@ int BTDisconnect_getHeight() {
 }
 
 void BTDisconnect_draw(GContext* ctx, int yPosition) {
-  if(!bluetooth_connection_service_peek()) {
+  //if(!bluetooth_connection_service_peek()) {
     gdraw_command_image_recolor(disconnectImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
     gdraw_command_image_draw(ctx, disconnectImage, GPoint(3 + SidebarWidgets_xOffset, yPosition));
-  }
+  //}
 }

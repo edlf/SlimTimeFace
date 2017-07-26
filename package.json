@@ -48,11 +48,6 @@
           "type": "raw"
         },
         {
-          "file": "data/DATE_BG.pdc",
-          "name": "DATE_BG",
-          "type": "raw"
-        },
-        {
           "file": "data/BATTERY_CHARGE.pdc",
           "name": "BATTERY_CHARGE",
           "type": "raw"

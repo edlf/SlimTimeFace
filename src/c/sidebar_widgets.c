@@ -142,8 +142,8 @@ int BTDisconnect_getHeight() {
 }
 
 void BTDisconnect_draw(GContext* ctx, int yPosition) {
-  //if(!bluetooth_connection_service_peek()) {
+  if(!bluetooth_connection_service_peek()) {
     gdraw_command_image_recolor(disconnectImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
     gdraw_command_image_draw(ctx, disconnectImage, GPoint(3 + SidebarWidgets_xOffset, yPosition));
-  //}
+  }
 }

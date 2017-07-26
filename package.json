@@ -16,7 +16,6 @@
     "enableMultiJS": false,
     "targetPlatforms": [
       "basalt",
-      "chalk",
       "diorite",
       "emery"
     ],

@@ -17,3 +17,5 @@
 #define WIDGET_0 batteryMeterWidget
 #define WIDGET_1 btDisconnectWidget
 #define WIDGET_2 dateWidget
+
+#define V_PADDING_DEFAULT 8

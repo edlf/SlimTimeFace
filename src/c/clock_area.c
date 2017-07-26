@@ -19,10 +19,6 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
   // check layer bounds
   GRect bounds = layer_get_unobstructed_bounds(l);
 
-  #ifdef PBL_ROUND
-    bounds = GRect(0, ROUND_VERTICAL_PADDING, screen_rect.size.w, screen_rect.size.h - ROUND_VERTICAL_PADDING * 2);
-  #endif
-
   // initialize FCTX, the fancy 3rd party drawing library that all the cool kids use
   FContext fctx;
 
@@ -43,14 +39,8 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
     fctx_enable_aa(true);
   #endif
 
-  // if it's a round watch, EVERYTHING CHANGES
-  #ifdef PBL_ROUND
-    v_adjust = ROUND_VERTICAL_PADDING;
-    h_adjust = -1;
-  #else
-    // for rectangular watches, adjust X position based on sidebar position
-    h_adjust -= ACTION_BAR_WIDTH / 2 + 1;
-  #endif
+  // for rectangular watches, adjust X position based on sidebar position
+  h_adjust -= ACTION_BAR_WIDTH / 2 + 1;
 
   FPoint time_pos;
   fctx_begin_fill(&fctx);

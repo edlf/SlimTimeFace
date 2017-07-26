@@ -28,10 +28,6 @@ SidebarWidget batteryMeterWidget;
 int BatteryMeter_getHeight();
 void BatteryMeter_draw(GContext* ctx, int yPosition);
 
-SidebarWidget emptyWidget;
-int EmptyWidget_getHeight();
-void EmptyWidget_draw(GContext* ctx, int yPosition);
-
 SidebarWidget dateWidget;
 int DateWidget_getHeight();
 void DateWidget_draw(GContext* ctx, int yPosition);
@@ -55,9 +51,6 @@ void SidebarWidgets_init() {
   // set up widgets' function pointers correctly
   batteryMeterWidget.getHeight = BatteryMeter_getHeight;
   batteryMeterWidget.draw      = BatteryMeter_draw;
-
-  emptyWidget.getHeight = EmptyWidget_getHeight;
-  emptyWidget.draw      = EmptyWidget_draw;
 
   dateWidget.getHeight = DateWidget_getHeight;
   dateWidget.draw      = DateWidget_draw;
@@ -88,15 +81,6 @@ void SidebarWidgets_updateTime(struct tm* timeInfo) {
   }
 
   strftime(currentWeekNum, sizeof(currentWeekNum), "%V", timeInfo);
-}
-
-/********** functions for the empty widget **********/
-int EmptyWidget_getHeight() {
-  return 0;
-}
-
-void EmptyWidget_draw(GContext* ctx, int yPosition) {
-  return;
 }
 
 /********** functions for the battery meter widget **********/

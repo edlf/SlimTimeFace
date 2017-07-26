@@ -10,7 +10,6 @@
 extern GRect screen_rect;
 
 extern SidebarWidget batteryMeterWidget;
-extern SidebarWidget emptyWidget;
 extern SidebarWidget dateWidget;
 extern SidebarWidget btDisconnectWidget;
 

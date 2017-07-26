@@ -3,7 +3,6 @@
 #include <pebble-fctx/fpath.h>
 #include <pebble-fctx/ffont.h>
 #include "clock_area.h"
-#include "settings.h"
 
 #define ROUND_VERTICAL_PADDING 15
 
@@ -11,39 +10,10 @@ char time_hours[3];
 char time_minutes[3];
 
 Layer* clock_area_layer;
-FFont* hours_font_pt;
-FFont* minutes_font_pt;
-
 FFont* avenir;
 FFont* avenir_bold;
 
 extern GRect screen_rect;
-
-// "private" functions
-void update_fonts() {
-  switch(globalSettings.clockFontId) {
-    default:
-    case FONT_SETTING_DEFAULT:
-      hours_font_pt = avenir;
-      minutes_font_pt = avenir;
-      break;
-
-    case FONT_SETTING_BOLD:
-      hours_font_pt = avenir_bold;
-      minutes_font_pt = avenir_bold;
-      break;
-
-    case FONT_SETTING_BOLD_H:
-      hours_font_pt = avenir_bold;
-      minutes_font_pt = avenir;
-      break;
-
-    case FONT_SETTING_BOLD_M:
-      hours_font_pt = avenir;
-      minutes_font_pt = avenir_bold;
-      break;
-  }
-}
 
 void update_clock_area_layer(Layer *l, GContext* ctx) {
   // check layer bounds
@@ -58,7 +28,7 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
 
   fctx_init_context(&fctx, ctx);
   fctx_set_color_bias(&fctx, 0);
-  fctx_set_fill_color(&fctx, globalSettings.timeColor);
+  fctx_set_fill_color(&fctx, TIME_COLOR);
 
 
   // calculate font size
@@ -84,19 +54,19 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
 
   FPoint time_pos;
   fctx_begin_fill(&fctx);
-  fctx_set_text_em_height(&fctx, hours_font_pt, font_size);
-  fctx_set_text_em_height(&fctx, minutes_font_pt, font_size);
+  fctx_set_text_em_height(&fctx, avenir, font_size);
+  fctx_set_text_em_height(&fctx, avenir, font_size);
 
   // draw hours
   time_pos.x = INT_TO_FIXED(bounds.size.w / 2 + h_adjust);
   time_pos.y = INT_TO_FIXED(v_padding + v_adjust);
   fctx_set_offset(&fctx, time_pos);
-  fctx_draw_string(&fctx, time_hours, hours_font_pt, GTextAlignmentCenter, FTextAnchorTop);
+  fctx_draw_string(&fctx, time_hours, avenir, GTextAlignmentCenter, FTextAnchorTop);
 
   //draw minutes
   time_pos.y = INT_TO_FIXED(bounds.size.h - v_padding + v_adjust);
   fctx_set_offset(&fctx, time_pos);
-  fctx_draw_string(&fctx, time_minutes, minutes_font_pt, GTextAlignmentCenter, FTextAnchorBaseline);
+  fctx_draw_string(&fctx, time_minutes, avenir, GTextAlignmentCenter, FTextAnchorBaseline);
   fctx_end_fill(&fctx);
 
   fctx_deinit_context(&fctx);
@@ -118,9 +88,6 @@ void ClockArea_init(Window* window) {
   // allocate fonts
   avenir =      ffont_create_from_resource(RESOURCE_ID_AVENIR_REGULAR_FFONT);
   avenir_bold = ffont_create_from_resource(RESOURCE_ID_AVENIR_BOLD_FFONT);
-
-  // select fonts based on settings
-  update_fonts();
 }
 
 void ClockArea_deinit() {
@@ -132,19 +99,23 @@ void ClockArea_deinit() {
 }
 
 void ClockArea_redraw() {
-  // check if the fonts need to be switched
-  update_fonts();
-
   layer_mark_dirty(clock_area_layer);
 }
 
 void ClockArea_update_time(struct tm* time_info) {
-
   // hours
   if (clock_is_24h_style()) {
-    strftime(time_hours, sizeof(time_hours), (globalSettings.showLeadingZero) ? "%H" : "%k", time_info);
+    #ifdef SHOW_LEADING_ZERO
+    strftime(time_hours, sizeof(time_hours), "%H", time_info);
+    #else
+    strftime(time_hours, sizeof(time_hours), "%k", time_info);
+    #endif
   } else {
-    strftime(time_hours, sizeof(time_hours), (globalSettings.showLeadingZero) ? "%I" : "%l", time_info);
+    #ifdef SHOW_LEADING_ZERO
+    strftime(time_hours, sizeof(time_hours), "%I", time_info);
+    #else
+    strftime(time_hours, sizeof(time_hours), "%l", time_info);
+    #endif
   }
 
   // minutes

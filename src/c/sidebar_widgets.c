@@ -1,6 +1,5 @@
 #include <pebble.h>
 #include <math.h>
-#include "settings.h"
 #include "util.h"
 #include "sidebar_widgets.h"
 
@@ -91,23 +90,6 @@ void SidebarWidgets_updateTime(struct tm* timeInfo) {
   strftime(currentWeekNum, sizeof(currentWeekNum), "%V", timeInfo);
 }
 
-/* Sidebar Widget Selection */
-SidebarWidget getSidebarWidgetByType(SidebarWidgetType type) {
-  switch(type) {
-    case BATTERY_METER:
-      return batteryMeterWidget;
-
-    case BLUETOOTH_DISCONNECT:
-      return btDisconnectWidget;
-
-    case DATE:
-      return dateWidget;
-
-    default:
-      return emptyWidget;
-  }
-}
-
 /********** functions for the empty widget **********/
 int EmptyWidget_getHeight() {
   return 0;
@@ -127,26 +109,26 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
   BatteryChargeState chargeState = battery_state_service_peek();
   uint8_t battery_percent = (chargeState.charge_percent > 0) ? chargeState.charge_percent : 5;
 
-  graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
+  graphics_context_set_text_color(ctx, SIDEBAR_BG_COLOR);
 
   int batteryPositionY = yPosition - 5; // correct for vertical empty space on battery icon
 
   if (batteryImage) {
-    gdraw_command_image_recolor(batteryImage, globalSettings.iconFillColor, globalSettings.iconStrokeColor);
+    gdraw_command_image_recolor(batteryImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
     gdraw_command_image_draw(ctx, batteryImage, GPoint(3 + SidebarWidgets_xOffset, batteryPositionY));
   }
 
   if(chargeState.is_charging) {
     if(batteryChargeImage) {
       // the charge "bolt" icon uses inverted colors
-      gdraw_command_image_recolor(batteryChargeImage, globalSettings.iconStrokeColor, globalSettings.iconFillColor);
+      gdraw_command_image_recolor(batteryChargeImage, SIDEBAR_COLOR, SIDEBAR_BG_COLOR);
       gdraw_command_image_draw(ctx, batteryChargeImage, GPoint(3 + SidebarWidgets_xOffset, batteryPositionY));
     }
   } else {
 
     int width = roundf(18 * battery_percent / 100.0f);
 
-    graphics_context_set_fill_color(ctx, globalSettings.iconStrokeColor);
+    graphics_context_set_fill_color(ctx, SIDEBAR_COLOR);
 
     #ifdef PBL_COLOR
       if(battery_percent <= 20) {
@@ -164,7 +146,7 @@ int DateWidget_getHeight() {
 }
 
 void DateWidget_draw(GContext* ctx, int yPosition) {
-  graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
+  graphics_context_set_text_color(ctx, SIDEBAR_BG_COLOR);
 
   // compensate for extra space that appears on the top of the date widget
   yPosition -= 7;
@@ -172,12 +154,12 @@ void DateWidget_draw(GContext* ctx, int yPosition) {
   // next, draw the date background
   // (an image in normal mode, a rectangle in large font mode)
   if(dateImage) {
-    gdraw_command_image_recolor(dateImage, globalSettings.iconFillColor, globalSettings.iconStrokeColor);
+    gdraw_command_image_recolor(dateImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
     gdraw_command_image_draw(ctx, dateImage, GPoint(3 + SidebarWidgets_xOffset, yPosition + 23));
   }
 
   // next, draw the date number
-  graphics_context_set_text_color(ctx, globalSettings.iconStrokeColor);
+  graphics_context_set_text_color(ctx, SIDEBAR_COLOR);
 
   int yOffset = 0;
   yOffset = 26;
@@ -191,7 +173,7 @@ void DateWidget_draw(GContext* ctx, int yPosition) {
                      NULL);
 
   // switch back to normal color for the rest
-  graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
+  graphics_context_set_text_color(ctx, SIDEBAR_BG_COLOR);
 }
 
 /***** Bluetooth Disconnection Widget *****/
@@ -201,7 +183,7 @@ int BTDisconnect_getHeight() {
 
 void BTDisconnect_draw(GContext* ctx, int yPosition) {
   if(!bluetooth_connection_service_peek()) {
-    gdraw_command_image_recolor(disconnectImage, globalSettings.iconFillColor, globalSettings.iconStrokeColor);
+    gdraw_command_image_recolor(disconnectImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
     gdraw_command_image_draw(ctx, disconnectImage, GPoint(3 + SidebarWidgets_xOffset, yPosition));
   }
 }

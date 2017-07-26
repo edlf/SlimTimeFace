@@ -1,5 +1,6 @@
 #pragma once
 #include <pebble.h>
+#include "definitions.h"
 
 typedef enum {
   FONT_SETTING_DEFAULT = 0,

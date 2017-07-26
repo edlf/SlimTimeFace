@@ -1,7 +1,6 @@
 #include <pebble.h>
 #include "util.h"
 
-
 bool recolor_iterator_cb(GDrawCommand *command, uint32_t index, void *context) {
   GColor *colors = (GColor *)context;
 

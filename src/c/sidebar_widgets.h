@@ -1,5 +1,6 @@
 #pragma once
 #include <pebble.h>
+#include "definitions.h"
 
 /*
  * "Compact Mode" is a global setting shared by all widgets, which determines
@@ -13,17 +14,6 @@ extern bool SidebarWidgets_useCompactMode;
  * Included for round support
  */
 extern int SidebarWidgets_xOffset;
-
-/*
- * The different types of sidebar widgets:
- * we'll give them numbers so that we can index them in settings
- */
-typedef enum {
-  EMPTY                     = 0,
-  BLUETOOTH_DISCONNECT      = 1,
-  BATTERY_METER             = 2,
-  DATE                      = 3
-} SidebarWidgetType;
 
 typedef struct {
   /*
@@ -40,6 +30,5 @@ typedef struct {
 
 void SidebarWidgets_init();
 void SidebarWidgets_deinit();
-SidebarWidget getSidebarWidgetByType(SidebarWidgetType type);
 void SidebarWidgets_updateFonts();
 void SidebarWidgets_updateTime(struct tm* timeInfo);

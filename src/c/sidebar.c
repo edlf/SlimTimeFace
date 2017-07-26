@@ -1,7 +1,6 @@
 #include <pebble.h>
 #include <ctype.h>
 #include <math.h>
-#include "settings.h"
 #include "sidebar.h"
 #include "sidebar_widgets.h"
 
@@ -9,6 +8,11 @@
 #define V_PADDING_COMPACT 4
 
 extern GRect screen_rect;
+
+extern SidebarWidget batteryMeterWidget;
+extern SidebarWidget emptyWidget;
+extern SidebarWidget dateWidget;
+extern SidebarWidget btDisconnectWidget;
 
 // "private" functions
 // layer update callbacks
@@ -20,7 +24,7 @@ extern GRect screen_rect;
   void updateRoundSidebarRight(Layer *l, GContext* ctx);
 
   // shared drawing stuff between all layers
-  void drawRoundSidebar(GContext* ctx, GRect bgBounds, SidebarWidgetType widgetType, int widgetXOffset);
+  void drawRoundSidebar(GContext* ctx, GRect bgBounds, SidebarWidget widget, int widgetXOffset);
 #endif
 
 Layer* sidebarLayer;
@@ -90,59 +94,24 @@ void Sidebar_updateTime(struct tm* timeInfo) {
 
 #ifdef PBL_ROUND
 
-// returns the best candidate widget for replacement by the auto battery
-// or the disconnection icon
-int getReplacableWidget() {
-  if(globalSettings.widgets[0] == EMPTY) {
-    return 0;
-  } else if(globalSettings.widgets[2] == EMPTY) {
-    return 2;
-  }
-
-  // if we don't have any of those things, just replace the left widget
-  return 0;
-}
-
-#else
-
-// returns the best candidate widget for replacement by the auto battery
-// or the disconnection icon
-int getReplacableWidget() {
-  // if any widgets are empty, it's an obvious choice
-  for(int i = 0; i < 3; i++) {
-    if(globalSettings.widgets[i] == EMPTY) {
-      return i;
-    }
-  }
-
-  // if we don't have any of those things, just replace the middle widget
-  return 1;
-}
-
-#endif
-
-#ifdef PBL_ROUND
-
 void updateRoundSidebarRight(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_bounds(l);
   GRect bgBounds = GRect(bounds.origin.x, bounds.size.h / -2, bounds.size.h * 2, bounds.size.h * 2);
 
-  SidebarWidgetType displayWidget = globalSettings.widgets[2];
-  drawRoundSidebar(ctx, bgBounds, displayWidget, 3);
+  drawRoundSidebar(ctx, bgBounds, WIDGET_2, 3);
 }
 
 void updateRoundSidebarLeft(Layer *l, GContext* ctx) {
   GRect bounds = layer_get_bounds(l);
   GRect bgBounds = GRect(bounds.origin.x - bounds.size.h * 2 + bounds.size.w, bounds.size.h / -2, bounds.size.h * 2, bounds.size.h * 2);
 
-  SidebarWidgetType displayWidget = globalSettings.widgets[0];
-  drawRoundSidebar(ctx, bgBounds, displayWidget, 7);
+  drawRoundSidebar(ctx, bgBounds, WIDGET_0, 7);
 }
 
-void drawRoundSidebar(GContext* ctx, GRect bgBounds, SidebarWidgetType widgetType, int widgetXOffset) {
+void drawRoundSidebar(GContext* ctx, GRect bgBounds, SidebarWidget widget, int widgetXOffset) {
   SidebarWidgets_updateFonts();
 
-  graphics_context_set_fill_color(ctx, globalSettings.sidebarColor);
+  graphics_context_set_fill_color(ctx, SIDEBAR_BG_COLOR);
 
   graphics_fill_radial(ctx,
                        bgBounds,
@@ -152,7 +121,6 @@ void drawRoundSidebar(GContext* ctx, GRect bgBounds, SidebarWidgetType widgetTyp
                        TRIG_MAX_ANGLE);
 
   SidebarWidgets_xOffset = widgetXOffset;
-  SidebarWidget widget = getSidebarWidgetByType(widgetType);
 
   // calculate center position of the widget
   int widgetPosition = bgBounds.size.h / 4 - widget.getHeight() / 2;
@@ -169,16 +137,16 @@ void updateRectSidebar(Layer *l, GContext* ctx) {
 
   SidebarWidgets_updateFonts();
 
-  graphics_context_set_fill_color(ctx, globalSettings.sidebarColor);
+  graphics_context_set_fill_color(ctx, SIDEBAR_BG_COLOR);
   graphics_fill_rect(ctx, layer_get_bounds(l), 0, GCornerNone);
 
-  graphics_context_set_text_color(ctx, globalSettings.sidebarTextColor);
+  graphics_context_set_text_color(ctx, SIDEBAR_COLOR);
 
   SidebarWidget displayWidgets[3];
 
-  displayWidgets[0] = getSidebarWidgetByType(globalSettings.widgets[0]);
-  displayWidgets[1] = getSidebarWidgetByType(globalSettings.widgets[1]);
-  displayWidgets[2] = getSidebarWidgetByType(globalSettings.widgets[2]);
+  displayWidgets[0] = WIDGET_0;
+  displayWidgets[1] = WIDGET_1;
+  displayWidgets[2] = WIDGET_2;
 
   int compact_mode_threshold = bounds.size.h - V_PADDING_DEFAULT * 2 - 3;
   int v_padding = V_PADDING_DEFAULT;

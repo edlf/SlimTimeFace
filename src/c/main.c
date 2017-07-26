@@ -1,6 +1,6 @@
 #include <pebble.h>
+#include "definitions.h"
 #include "clock_area.h"
-#include "settings.h"
 #include "sidebar.h"
 #include "util.h"
 
@@ -33,7 +33,7 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 /* forces everything on screen to be redrawn -- perfect for keeping track of settings! */
 void redrawScreen() {
-  window_set_background_color(mainWindow, globalSettings.timeBgColor);
+  window_set_background_color(mainWindow, TIME_BG_COLOR);
 
   // maybe the language changed!
   update_clock();
@@ -44,7 +44,7 @@ void redrawScreen() {
 }
 
 static void main_window_load(Window *window) {
-  window_set_background_color(window, globalSettings.timeBgColor);
+  window_set_background_color(window, TIME_BG_COLOR);
 
   // create the sidebar
   Sidebar_init(window);
@@ -60,9 +60,10 @@ static void main_window_unload(Window *window) {
 }
 
 void bluetoothStateChanged(bool newConnectionState) {
+  #ifdef BLUETOOTH_STATE_CHANGED_VIBRATION
   // if the phone was connected but isn't anymore and the user has opted in,
   // trigger a vibration
-  if(!quiet_time_is_active() && isPhoneConnected && !newConnectionState && globalSettings.btVibe) {
+  if(!quiet_time_is_active() && isPhoneConnected && !newConnectionState) {
     static uint32_t const segments[] = { 200, 100, 100, 100, 500 };
     VibePattern pat = {
       .durations = segments,
@@ -70,6 +71,7 @@ void bluetoothStateChanged(bool newConnectionState) {
       };
     vibes_enqueue_custom_pattern(pat);
   }
+  #endif
 
   isPhoneConnected = newConnectionState;
 
@@ -98,9 +100,6 @@ static void app_focus_changed(bool focused) {
 
 static void init() {
   setlocale(LC_ALL, "");
-
-  // init settings
-  Settings_init();
 
   // Create main Window element and assign to pointer
   mainWindow = window_create();

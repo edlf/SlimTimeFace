@@ -1,5 +1,7 @@
 #pragma once
 #include <pebble.h>
+#include "util.h"
+#include "definitions.h"
 
 // "public" functions
 void Sidebar_init(Window* window);

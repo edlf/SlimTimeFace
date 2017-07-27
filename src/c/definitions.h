@@ -1,4 +1,7 @@
 #pragma once
+// "Configurations" for the watchface.
+// These are done here and for every change that you do, you must rebuild the app
+
 #define BLUETOOTH_STATE_CHANGED_VIBRATION
 #define SHOW_LEADING_ZERO
 

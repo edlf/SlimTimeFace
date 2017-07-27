@@ -1,6 +1,8 @@
 # SlimTimeFace
 A stylish, modern watchface for the Pebble and Pebble Time watches. This is based on the code of [TimeStyle watchface](https://github.com/freakified/TimeStylePebble).
 
+The main goal is to make it as lean as possible and to waste the least amount of battery as possible.
+
 <img src="screenshot.png" width="288" height="336">
 
 ## What gives feature XYZ is missing!

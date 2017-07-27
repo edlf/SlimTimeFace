@@ -24,7 +24,6 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
   fctx_set_color_bias(&fctx, 0);
   fctx_set_fill_color(&fctx, TIME_COLOR);
 
-
   // calculate font size
   int font_size = 4 * bounds.size.h / 7;
 

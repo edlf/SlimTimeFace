@@ -6,10 +6,6 @@
 
 extern GRect screen_rect;
 
-extern SidebarWidget batteryMeterWidget;
-extern SidebarWidget dateWidget;
-extern SidebarWidget btDisconnectWidget;
-
 // "private" functions
 // layer update callbacks
 void updateRectSidebar(Layer *l, GContext* ctx);
@@ -52,7 +48,7 @@ void updateRectSidebar(Layer *l, GContext* ctx) {
   graphics_context_set_text_color(ctx, SIDEBAR_COLOR);
 
   // draw the widgets
-  batteryMeterWidget.draw(ctx, BATTERY_VERTICA_POS);
-  btDisconnectWidget.draw(ctx, BT_INDICATOR_VERTICAL_POS);
-  dateWidget.draw(ctx, DAY_VERTICAL_POS);
+  BatteryMeter_draw(ctx);
+  BTDisconnect_draw(ctx);
+  DateWidget_draw(ctx);
 }

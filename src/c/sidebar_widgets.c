@@ -17,16 +17,6 @@ char currentDayNum[3];
 char currentWeekNum[3];
 char altClock[8];
 
-// the widgets
-SidebarWidget batteryMeterWidget;
-void BatteryMeter_draw(GContext* ctx, int yPosition);
-
-SidebarWidget dateWidget;
-void DateWidget_draw(GContext* ctx, int yPosition);
-
-SidebarWidget btDisconnectWidget;
-void BTDisconnect_draw(GContext* ctx, int yPosition);
-
 void SidebarWidgets_init() {
   // load fonts
   smSidebarFont = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
@@ -36,11 +26,6 @@ void SidebarWidgets_init() {
   disconnectImage = gdraw_command_image_create_with_resource(RESOURCE_ID_DISCONNECTED);
   batteryImage = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_BG);
   batteryChargeImage = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_CHARGE);
-
-  // set up widgets' function pointers correctly
-  batteryMeterWidget.draw      = BatteryMeter_draw;
-  dateWidget.draw      = DateWidget_draw;
-  btDisconnectWidget.draw      = BTDisconnect_draw;
 }
 
 void SidebarWidgets_deinit() {
@@ -61,26 +46,23 @@ void SidebarWidgets_updateTime(struct tm* timeInfo) {
   strftime(currentWeekNum, sizeof(currentWeekNum), "%V", timeInfo);
 }
 
-/********** functions for the battery meter widget **********/
-void BatteryMeter_draw(GContext* ctx, int yPosition) {
+void BatteryMeter_draw(GContext* ctx) {
 
   BatteryChargeState chargeState = battery_state_service_peek();
   uint8_t battery_percent = (chargeState.charge_percent > 0) ? chargeState.charge_percent : 5;
 
   graphics_context_set_text_color(ctx, SIDEBAR_BG_COLOR);
 
-  int batteryPositionY = yPosition - 5; // correct for vertical empty space on battery icon
-
   if (batteryImage) {
     gdraw_command_image_recolor(batteryImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
-    gdraw_command_image_draw(ctx, batteryImage, GPoint(3, batteryPositionY));
+    gdraw_command_image_draw(ctx, batteryImage, GPoint(BATTERY_HORIZONAL_POS, BATTERY_VERTICAL_POS));
   }
 
   if(chargeState.is_charging) {
     if(batteryChargeImage) {
       // the charge "bolt" icon uses inverted colors
       gdraw_command_image_recolor(batteryChargeImage, SIDEBAR_COLOR, SIDEBAR_BG_COLOR);
-      gdraw_command_image_draw(ctx, batteryChargeImage, GPoint(3, batteryPositionY));
+      gdraw_command_image_draw(ctx, batteryChargeImage, GPoint(BATTERY_HORIZONAL_POS, BATTERY_VERTICAL_POS));
     }
   } else {
 
@@ -94,27 +76,25 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
       }
     #endif
 
-    graphics_fill_rect(ctx, GRect(6, 8 + batteryPositionY, width, 8), 0, GCornerNone);
+    graphics_fill_rect(ctx, GRect(6, 8 + BATTERY_VERTICAL_POS, width, 8), 0, GCornerNone);
   }
 }
 
-/********** current date widget **********/
-void DateWidget_draw(GContext* ctx, int yPosition) {
+void DateWidget_draw(GContext* ctx) {
   graphics_context_set_text_color(ctx, SIDEBAR_COLOR);
 
   graphics_draw_text(ctx,
                      currentDayNum,
                      mdSidebarFont,
-                     GRect(-5, yPosition, 40, 20),
+                     GRect(DAY_HORIZONTAL_POS, DAY_VERTICAL_POS, 40, 20),
                      GTextOverflowModeFill,
                      GTextAlignmentCenter,
                      NULL);
 }
 
-/***** Bluetooth Disconnection Widget *****/
-void BTDisconnect_draw(GContext* ctx, int yPosition) {
+void BTDisconnect_draw(GContext* ctx) {
   if(!bluetooth_connection_service_peek()) {
     gdraw_command_image_recolor(disconnectImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
-    gdraw_command_image_draw(ctx, disconnectImage, GPoint(3, yPosition));
+    gdraw_command_image_draw(ctx, disconnectImage, GPoint(BT_INDICATOR_HORIZONTAL_POS, BT_INDICATOR_VERTICAL_POS));
   }
 }

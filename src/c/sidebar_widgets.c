@@ -94,14 +94,14 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
 
   if (batteryImage) {
     gdraw_command_image_recolor(batteryImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
-    gdraw_command_image_draw(ctx, batteryImage, GPoint(3 + SidebarWidgets_xOffset, batteryPositionY));
+    gdraw_command_image_draw(ctx, batteryImage, GPoint(3, batteryPositionY));
   }
 
   if(chargeState.is_charging) {
     if(batteryChargeImage) {
       // the charge "bolt" icon uses inverted colors
       gdraw_command_image_recolor(batteryChargeImage, SIDEBAR_COLOR, SIDEBAR_BG_COLOR);
-      gdraw_command_image_draw(ctx, batteryChargeImage, GPoint(3 + SidebarWidgets_xOffset, batteryPositionY));
+      gdraw_command_image_draw(ctx, batteryChargeImage, GPoint(3, batteryPositionY));
     }
   } else {
 
@@ -115,7 +115,7 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
       }
     #endif
 
-    graphics_fill_rect(ctx, GRect(6 + SidebarWidgets_xOffset, 8 + batteryPositionY, width, 8), 0, GCornerNone);
+    graphics_fill_rect(ctx, GRect(6, 8 + batteryPositionY, width, 8), 0, GCornerNone);
   }
 }
 
@@ -130,7 +130,7 @@ void DateWidget_draw(GContext* ctx, int yPosition) {
   graphics_draw_text(ctx,
                      currentDayNum,
                      currentSidebarFont,
-                     GRect(-5 + SidebarWidgets_xOffset, yPosition, 40, 20),
+                     GRect(-5, yPosition, 40, 20),
                      GTextOverflowModeFill,
                      GTextAlignmentCenter,
                      NULL);
@@ -144,6 +144,6 @@ int BTDisconnect_getHeight() {
 void BTDisconnect_draw(GContext* ctx, int yPosition) {
   if(!bluetooth_connection_service_peek()) {
     gdraw_command_image_recolor(disconnectImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);
-    gdraw_command_image_draw(ctx, disconnectImage, GPoint(3 + SidebarWidgets_xOffset, yPosition));
+    gdraw_command_image_draw(ctx, disconnectImage, GPoint(3, yPosition));
   }
 }

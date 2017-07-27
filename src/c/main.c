@@ -4,9 +4,6 @@
 #include "sidebar.h"
 #include "util.h"
 
-// precalc values
-int SidebarWidgets_xOffset;
-
 // windows and layers
 static Window* mainWindow;
 static Layer* windowLayer;
@@ -144,14 +141,7 @@ static void deinit() {
   battery_state_service_unsubscribe();
 }
 
-static void pre_calc(){
-  // this ends up being zero on every rectangular platform besides emery
-  SidebarWidgets_xOffset = (ACTION_BAR_WIDTH - 30) / 2;
-}
-
 int main(void) {
-  // avoid doing calculations more than once
-  pre_calc();
   init();
   app_event_loop();
   deinit();

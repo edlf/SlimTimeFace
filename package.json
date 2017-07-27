@@ -16,8 +16,7 @@
     "enableMultiJS": false,
     "targetPlatforms": [
       "basalt",
-      "diorite",
-      "emery"
+      "diorite"
     ],
     "watchapp": {
       "onlyShownOnCommunication": false,

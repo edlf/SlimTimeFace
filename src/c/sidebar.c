@@ -14,10 +14,8 @@ GDrawCommandImage* batteryChargeImage;
 GFont smSidebarFont;
 GFont mdSidebarFont;
 
-// the date and time strings
+// current day string
 char currentDayNum[3];
-char currentWeekNum[3];
-char altClock[8];
 
 // "private" functions
 // layer update callbacks
@@ -59,15 +57,13 @@ void Sidebar_redraw() {
 }
 
 void Sidebar_updateTime(struct tm* timeInfo) {
-  // set all the date strings
+  // Get current day
   strftime(currentDayNum, sizeof(currentDayNum), "%e", timeInfo);
   // remove padding on date num, if needed
   if(currentDayNum[0] == ' ') {
     currentDayNum[0] = currentDayNum[1];
     currentDayNum[1] = '\0';
   }
-
-  strftime(currentWeekNum, sizeof(currentWeekNum), "%V", timeInfo);
 }
 
 void updateRectSidebar(Layer *l, GContext* ctx) {
@@ -76,7 +72,7 @@ void updateRectSidebar(Layer *l, GContext* ctx) {
 
   graphics_context_set_text_color(ctx, SIDEBAR_COLOR);
 
-  // Draw the date indicator
+  // Draw the battery indicator
   BatteryChargeState chargeState = battery_state_service_peek();
   uint8_t battery_percent = (chargeState.charge_percent > 0) ? chargeState.charge_percent : 5;
 

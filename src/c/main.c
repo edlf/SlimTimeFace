@@ -1,7 +1,6 @@
 #include <pebble.h>
 #include "definitions.h"
-#include "clock_area.h"
-#include "sidebar.h"
+#include "watch_face.h"
 #include "util.h"
 
 // windows and layers
@@ -19,16 +18,15 @@ void update_clock() {
   time(&rawTime);
   timeInfo = localtime(&rawTime);
 
-  ClockArea_update_time(timeInfo);
-  Sidebar_updateTime(timeInfo);
+  watch_face_update_time(timeInfo);
 }
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_clock();
 
   // redraw all screen
-  Sidebar_redraw();
-  ClockArea_redraw();
+  icons_redraw();
+  clock_redraw();
 }
 
 /* forces everything on screen to be redrawn -- perfect for keeping track of settings! */
@@ -39,24 +37,20 @@ void redrawScreen() {
   update_clock();
 
   // update the sidebar
-  Sidebar_redraw();
-  ClockArea_redraw();
+  icons_redraw();
+  clock_redraw();
 }
 
 static void main_window_load(Window *window) {
   window_set_background_color(window, TIME_BG_COLOR);
-
-  // create the sidebar
-  Sidebar_init(window);
-  ClockArea_init(window);
+  watch_face_init(window);
 
   // Make sure the time is displayed from the start
   redrawScreen();
 }
 
 static void main_window_unload(Window *window) {
-  ClockArea_deinit();
-  Sidebar_deinit();
+  watch_face_deinit();
 }
 
 void bluetoothStateChanged(bool newConnectionState) {
@@ -75,12 +69,12 @@ void bluetoothStateChanged(bool newConnectionState) {
 
   isPhoneConnected = newConnectionState;
 
-  Sidebar_redraw();
+  icons_redraw();
 }
 
 // force the sidebar to redraw any time the battery state changes
 void batteryStateChanged(BatteryChargeState charge_state) {
-  Sidebar_redraw();
+  icons_redraw();
 }
 
 // fixes for disappearing elements after notifications

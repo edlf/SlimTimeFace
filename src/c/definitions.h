@@ -19,7 +19,7 @@
 
 // Bt disconnect/connect indicator pos
 #define BT_INDICATOR_HORIZONTAL_POS 3
-#define BT_INDICATOR_VERTICAL_POS   52
+#define BT_INDICATOR_VERTICAL_POS   27
 
 // Day indicator Pos
 #define DAY_HORIZONTAL_POS -5

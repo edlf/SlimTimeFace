@@ -9,8 +9,7 @@ GDrawCommandImage* disconnectImage;
 GDrawCommandImage* batteryImage;
 GDrawCommandImage* batteryChargeImage;
 
-GFont smSidebarFont;
-GFont mdSidebarFont;
+GFont day_font;
 
 FFont* avenir;
 FFont* avenir_bold;
@@ -18,13 +17,14 @@ FFont* avenir_bold;
 // Draw
 Layer* clock_area_layer;
 Layer* sidebarLayer;
-GRect screen_rect;
+GRect grect_screen;
 
 // Strings
 char time_hours[3];
 char time_minutes[3];
 char time_day[3];
 
+// Clock area update callback
 void update_clock_area_layer(Layer *l, GContext* ctx) {
   // check layer bounds
   GRect bounds = layer_get_unobstructed_bounds(l);
@@ -71,6 +71,7 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
   fctx_deinit_context(&fctx);
 }
 
+// Icon area update callback
 void update_sidebar_area_layer(Layer *l, GContext* ctx) {
   // draw icons
   // Draw the battery indicator
@@ -118,7 +119,7 @@ void update_sidebar_area_layer(Layer *l, GContext* ctx) {
 
   graphics_draw_text(ctx,
                      time_day,
-                     mdSidebarFont,
+                     day_font,
                      GRect(DAY_HORIZONTAL_POS, DAY_VERTICAL_POS, 40, 20),
                      GTextOverflowModeFill,
                      GTextAlignmentCenter,
@@ -129,11 +130,10 @@ void update_sidebar_area_layer(Layer *l, GContext* ctx) {
 // "public" funcitons
 void watch_face_init(Window* window) {
   // record the screen size, since we NEVER GET IT AGAIN
-  screen_rect = layer_get_bounds(window_get_root_layer(window));
+  grect_screen = layer_get_bounds(window_get_root_layer(window));
 
   // load system fonts
-  smSidebarFont = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
-  mdSidebarFont = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
+  day_font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
 
   // allocate fonts
   avenir =      ffont_create_from_resource(RESOURCE_ID_AVENIR_REGULAR_FFONT);
@@ -145,7 +145,7 @@ void watch_face_init(Window* window) {
   batteryChargeImage = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_CHARGE);
 
   GRect bounds;
-  bounds = GRect(0, 0, screen_rect.size.w, screen_rect.size.h);
+  bounds = GRect(0, 0, grect_screen.size.w, grect_screen.size.h);
 
   // init the clock area layer
   clock_area_layer = layer_create(bounds);
@@ -153,8 +153,8 @@ void watch_face_init(Window* window) {
   layer_set_update_proc(clock_area_layer, update_clock_area_layer);
 
   // init the sidebar layer
-  screen_rect = layer_get_bounds(window_get_root_layer(window));
-  bounds = GRect(screen_rect.size.w - ACTION_BAR_WIDTH, 0, ACTION_BAR_WIDTH, screen_rect.size.h);
+  grect_screen = layer_get_bounds(window_get_root_layer(window));
+  bounds = GRect(grect_screen.size.w - ACTION_BAR_WIDTH, 0, ACTION_BAR_WIDTH, grect_screen.size.h);
 
   sidebarLayer = layer_create(bounds);
   layer_add_child(window_get_root_layer(window), sidebarLayer);
@@ -175,17 +175,21 @@ void watch_face_deinit() {
   gdraw_command_image_destroy(batteryChargeImage);
 }
 
+// Redraws the clock layer
 void clock_redraw() {
   layer_mark_dirty(clock_area_layer);
 }
 
+// Redraws the icons layer
 void icons_redraw() {
-  layer_set_frame(sidebarLayer, GRect(screen_rect.size.w - ACTION_BAR_WIDTH, 0, ACTION_BAR_WIDTH, screen_rect.size.h));
+  layer_set_frame(sidebarLayer, GRect(grect_screen.size.w - ACTION_BAR_WIDTH, 0,
+                                      ACTION_BAR_WIDTH, grect_screen.size.h));
 
   // redraw the layer
   layer_mark_dirty(sidebarLayer);
 }
 
+// Updates time strings
 void watch_face_update_time(struct tm* time_info) {
   // hours
   if (clock_is_24h_style()) {

@@ -5,27 +5,26 @@
 #include "watch_face.h"
 
 // Resources
-GDrawCommandImage* disconnectImage;
-GDrawCommandImage* batteryImage;
-GDrawCommandImage* batteryChargeImage;
+GDrawCommandImage* image_disconnect;
+GDrawCommandImage* image_battery;
+GDrawCommandImage* image_battery_charge;
 
-GFont day_font;
-
-FFont* avenir;
-FFont* avenir_bold;
+GFont gfont_day;
+FFont* ffont_avenir;
+FFont* ffont_avenir_bold;
 
 // Draw
-Layer* clock_area_layer;
-Layer* sidebarLayer;
-GRect grect_screen;
+Layer* layer_clock_area;
+Layer* layer_sidebar;
+GRect  grect_screen;
 
 // Strings
-char time_hours[3];
-char time_minutes[3];
-char time_day[3];
+char string_hours[3];
+char string_minutes[3];
+char string_day[3];
 
 // Clock area update callback
-void update_clock_area_layer(Layer *l, GContext* ctx) {
+void update_layer_clock_area(Layer *l, GContext* ctx) {
   // check layer bounds
   GRect bounds = layer_get_unobstructed_bounds(l);
 
@@ -53,19 +52,19 @@ void update_clock_area_layer(Layer *l, GContext* ctx) {
 
   FPoint time_pos;
   fctx_begin_fill(&fctx);
-  fctx_set_text_em_height(&fctx, avenir, font_size);
-  fctx_set_text_em_height(&fctx, avenir, font_size);
+  fctx_set_text_em_height(&fctx, ffont_avenir, font_size);
+  fctx_set_text_em_height(&fctx, ffont_avenir, font_size);
 
   // draw hours
   time_pos.x = INT_TO_FIXED(bounds.size.w / 2 + h_adjust);
   time_pos.y = INT_TO_FIXED(v_padding + v_adjust);
   fctx_set_offset(&fctx, time_pos);
-  fctx_draw_string(&fctx, time_hours, avenir, GTextAlignmentCenter, FTextAnchorTop);
+  fctx_draw_string(&fctx, string_hours, ffont_avenir, GTextAlignmentCenter, FTextAnchorTop);
 
   //draw minutes
   time_pos.y = INT_TO_FIXED(bounds.size.h - v_padding + v_adjust);
   fctx_set_offset(&fctx, time_pos);
-  fctx_draw_string(&fctx, time_minutes, avenir, GTextAlignmentCenter, FTextAnchorBaseline);
+  fctx_draw_string(&fctx, string_minutes, ffont_avenir, GTextAlignmentCenter, FTextAnchorBaseline);
   fctx_end_fill(&fctx);
 
   fctx_deinit_context(&fctx);
@@ -80,16 +79,16 @@ void update_sidebar_area_layer(Layer *l, GContext* ctx) {
 
   graphics_context_set_text_color(ctx, TIME_BG_COLOR);
 
-  if (batteryImage) {
-    gdraw_command_image_recolor(batteryImage, TIME_BG_COLOR, TIME_COLOR);
-    gdraw_command_image_draw(ctx, batteryImage, GPoint(BATTERY_HORIZONAL_POS, BATTERY_VERTICAL_POS));
+  if (image_battery) {
+    gdraw_command_image_recolor(image_battery, TIME_BG_COLOR, TIME_COLOR);
+    gdraw_command_image_draw(ctx, image_battery, GPoint(BATTERY_HORIZONAL_POS, BATTERY_VERTICAL_POS));
   }
 
   if(chargeState.is_charging) {
-    if(batteryChargeImage) {
+    if(image_battery_charge) {
       // the charge "bolt" icon uses inverted colors
-      gdraw_command_image_recolor(batteryChargeImage, TIME_COLOR, TIME_BG_COLOR);
-      gdraw_command_image_draw(ctx, batteryChargeImage, GPoint(BATTERY_HORIZONAL_POS, BATTERY_VERTICAL_POS));
+      gdraw_command_image_recolor(image_battery_charge, TIME_COLOR, TIME_BG_COLOR);
+      gdraw_command_image_draw(ctx, image_battery_charge, GPoint(BATTERY_HORIZONAL_POS, BATTERY_VERTICAL_POS));
     }
   } else {
 
@@ -109,8 +108,8 @@ void update_sidebar_area_layer(Layer *l, GContext* ctx) {
 
   // Draw the BT indicator
   if(!bluetooth_connection_service_peek()) {
-    gdraw_command_image_recolor(disconnectImage, TIME_BG_COLOR, TIME_COLOR);
-    gdraw_command_image_draw(ctx, disconnectImage, GPoint(BT_INDICATOR_HORIZONTAL_POS, BT_INDICATOR_VERTICAL_POS));
+    gdraw_command_image_recolor(image_disconnect, TIME_BG_COLOR, TIME_COLOR);
+    gdraw_command_image_draw(ctx, image_disconnect, GPoint(BT_INDICATOR_HORIZONTAL_POS, BT_INDICATOR_VERTICAL_POS));
   }
   // End of bt indicator
 
@@ -118,8 +117,8 @@ void update_sidebar_area_layer(Layer *l, GContext* ctx) {
   graphics_context_set_text_color(ctx, TIME_COLOR);
 
   graphics_draw_text(ctx,
-                     time_day,
-                     day_font,
+                     string_day,
+                     gfont_day,
                      GRect(DAY_HORIZONTAL_POS, DAY_VERTICAL_POS, 40, 20),
                      GTextOverflowModeFill,
                      GTextAlignmentCenter,
@@ -133,60 +132,60 @@ void watch_face_init(Window* window) {
   grect_screen = layer_get_bounds(window_get_root_layer(window));
 
   // load system fonts
-  day_font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
+  gfont_day = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
 
   // allocate fonts
-  avenir =      ffont_create_from_resource(RESOURCE_ID_AVENIR_REGULAR_FFONT);
-  avenir_bold = ffont_create_from_resource(RESOURCE_ID_AVENIR_BOLD_FFONT);
+  ffont_avenir      = ffont_create_from_resource(RESOURCE_ID_AVENIR_REGULAR_FFONT);
+  ffont_avenir_bold = ffont_create_from_resource(RESOURCE_ID_AVENIR_BOLD_FFONT);
 
   // load the sidebar graphics
-  disconnectImage = gdraw_command_image_create_with_resource(RESOURCE_ID_DISCONNECTED);
-  batteryImage = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_BG);
-  batteryChargeImage = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_CHARGE);
+  image_disconnect     = gdraw_command_image_create_with_resource(RESOURCE_ID_DISCONNECTED);
+  image_battery        = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_BG);
+  image_battery_charge = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_CHARGE);
 
   GRect bounds;
   bounds = GRect(0, 0, grect_screen.size.w, grect_screen.size.h);
 
   // init the clock area layer
-  clock_area_layer = layer_create(bounds);
-  layer_add_child(window_get_root_layer(window), clock_area_layer);
-  layer_set_update_proc(clock_area_layer, update_clock_area_layer);
+  layer_clock_area = layer_create(bounds);
+  layer_add_child(window_get_root_layer(window), layer_clock_area);
+  layer_set_update_proc(layer_clock_area, update_layer_clock_area);
 
   // init the sidebar layer
   grect_screen = layer_get_bounds(window_get_root_layer(window));
   bounds = GRect(grect_screen.size.w - ACTION_BAR_WIDTH, 0, ACTION_BAR_WIDTH, grect_screen.size.h);
 
-  sidebarLayer = layer_create(bounds);
-  layer_add_child(window_get_root_layer(window), sidebarLayer);
-  layer_set_update_proc(sidebarLayer, update_sidebar_area_layer);
+  layer_sidebar = layer_create(bounds);
+  layer_add_child(window_get_root_layer(window), layer_sidebar);
+  layer_set_update_proc(layer_sidebar, update_sidebar_area_layer);
 }
 
 void watch_face_deinit() {
-  layer_destroy(clock_area_layer);
-  layer_destroy(sidebarLayer);
+  layer_destroy(layer_clock_area);
+  layer_destroy(layer_sidebar);
 
   // dealloc fonts
-  ffont_destroy(avenir);
-  ffont_destroy(avenir_bold);
+  ffont_destroy(ffont_avenir);
+  ffont_destroy(ffont_avenir_bold);
 
   // dealloc icons
-  gdraw_command_image_destroy(disconnectImage);
-  gdraw_command_image_destroy(batteryImage);
-  gdraw_command_image_destroy(batteryChargeImage);
+  gdraw_command_image_destroy(image_disconnect);
+  gdraw_command_image_destroy(image_battery);
+  gdraw_command_image_destroy(image_battery_charge);
 }
 
 // Redraws the clock layer
 void clock_redraw() {
-  layer_mark_dirty(clock_area_layer);
+  layer_mark_dirty(layer_clock_area);
 }
 
 // Redraws the icons layer
 void icons_redraw() {
-  layer_set_frame(sidebarLayer, GRect(grect_screen.size.w - ACTION_BAR_WIDTH, 0,
+  layer_set_frame(layer_sidebar, GRect(grect_screen.size.w - ACTION_BAR_WIDTH, 0,
                                       ACTION_BAR_WIDTH, grect_screen.size.h));
 
   // redraw the layer
-  layer_mark_dirty(sidebarLayer);
+  layer_mark_dirty(layer_sidebar);
 }
 
 // Updates time strings
@@ -194,26 +193,26 @@ void watch_face_update_time(struct tm* time_info) {
   // hours
   if (clock_is_24h_style()) {
     #ifdef SHOW_LEADING_ZERO
-    strftime(time_hours, sizeof(time_hours), "%H", time_info);
+    strftime(string_hours, sizeof(string_hours), "%H", time_info);
     #else
-    strftime(time_hours, sizeof(time_hours), "%k", time_info);
+    strftime(string_hours, sizeof(string_hours), "%k", time_info);
     #endif
   } else {
     #ifdef SHOW_LEADING_ZERO
-    strftime(time_hours, sizeof(time_hours), "%I", time_info);
+    strftime(string_hours, sizeof(string_hours), "%I", time_info);
     #else
-    strftime(time_hours, sizeof(time_hours), "%l", time_info);
+    strftime(string_hours, sizeof(string_hours), "%l", time_info);
     #endif
   }
 
   // minutes
-  strftime(time_minutes, sizeof(time_minutes), "%M", time_info);
+  strftime(string_minutes, sizeof(string_minutes), "%M", time_info);
 
   // day
-  strftime(time_day, sizeof(time_day), "%e", time_info);
+  strftime(string_day, sizeof(string_day), "%e", time_info);
   // remove padding on date num, if needed
-  if(time_day[0] == ' ') {
-    time_day[0] = time_day[1];
-    time_day[1] = '\0';
+  if(string_day[0] == ' ') {
+    string_day[0] = string_day[1];
+    string_day[1] = '\0';
   }
 }

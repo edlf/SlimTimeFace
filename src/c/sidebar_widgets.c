@@ -11,9 +11,6 @@ GDrawCommandImage* batteryChargeImage;
 // fonts
 GFont smSidebarFont;
 GFont mdSidebarFont;
-GFont lgSidebarFont;
-GFont currentSidebarFont;
-GFont batteryFont;
 
 // the date and time strings
 char currentDayNum[3];
@@ -22,22 +19,18 @@ char altClock[8];
 
 // the widgets
 SidebarWidget batteryMeterWidget;
-int BatteryMeter_getHeight();
 void BatteryMeter_draw(GContext* ctx, int yPosition);
 
 SidebarWidget dateWidget;
-int DateWidget_getHeight();
 void DateWidget_draw(GContext* ctx, int yPosition);
 
 SidebarWidget btDisconnectWidget;
-int BTDisconnect_getHeight();
 void BTDisconnect_draw(GContext* ctx, int yPosition);
 
 void SidebarWidgets_init() {
   // load fonts
   smSidebarFont = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
   mdSidebarFont = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
-  lgSidebarFont = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
 
   // load the sidebar graphics
   disconnectImage = gdraw_command_image_create_with_resource(RESOURCE_ID_DISCONNECTED);
@@ -45,13 +38,8 @@ void SidebarWidgets_init() {
   batteryChargeImage = gdraw_command_image_create_with_resource(RESOURCE_ID_BATTERY_CHARGE);
 
   // set up widgets' function pointers correctly
-  batteryMeterWidget.getHeight = BatteryMeter_getHeight;
   batteryMeterWidget.draw      = BatteryMeter_draw;
-
-  dateWidget.getHeight = DateWidget_getHeight;
   dateWidget.draw      = DateWidget_draw;
-
-  btDisconnectWidget.getHeight = BTDisconnect_getHeight;
   btDisconnectWidget.draw      = BTDisconnect_draw;
 }
 
@@ -59,11 +47,6 @@ void SidebarWidgets_deinit() {
   gdraw_command_image_destroy(disconnectImage);
   gdraw_command_image_destroy(batteryImage);
   gdraw_command_image_destroy(batteryChargeImage);
-}
-
-void SidebarWidgets_updateFonts() {
-  currentSidebarFont = mdSidebarFont;
-  batteryFont = smSidebarFont;
 }
 
 void SidebarWidgets_updateTime(struct tm* timeInfo) {
@@ -79,10 +62,6 @@ void SidebarWidgets_updateTime(struct tm* timeInfo) {
 }
 
 /********** functions for the battery meter widget **********/
-int BatteryMeter_getHeight() {
-  return 14;
-}
-
 void BatteryMeter_draw(GContext* ctx, int yPosition) {
 
   BatteryChargeState chargeState = battery_state_service_peek();
@@ -120,16 +99,12 @@ void BatteryMeter_draw(GContext* ctx, int yPosition) {
 }
 
 /********** current date widget **********/
-int DateWidget_getHeight() {
-  return 18;
-}
-
 void DateWidget_draw(GContext* ctx, int yPosition) {
   graphics_context_set_text_color(ctx, SIDEBAR_COLOR);
 
   graphics_draw_text(ctx,
                      currentDayNum,
-                     currentSidebarFont,
+                     mdSidebarFont,
                      GRect(-5, yPosition, 40, 20),
                      GTextOverflowModeFill,
                      GTextAlignmentCenter,
@@ -137,10 +112,6 @@ void DateWidget_draw(GContext* ctx, int yPosition) {
 }
 
 /***** Bluetooth Disconnection Widget *****/
-int BTDisconnect_getHeight() {
-  return 22;
-}
-
 void BTDisconnect_draw(GContext* ctx, int yPosition) {
   if(!bluetooth_connection_service_peek()) {
     gdraw_command_image_recolor(disconnectImage, SIDEBAR_BG_COLOR, SIDEBAR_COLOR);

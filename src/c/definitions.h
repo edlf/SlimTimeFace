@@ -10,12 +10,15 @@
 #else
   #define TIME_COLOR       GColorBlack
   #define TIME_BG_COLOR    GColorWhite
-  #define SIDEBAR_COLOR    GColorWhite
-  #define SIDEBAR_BG_COLOR GColorBlack
+  #define SIDEBAR_COLOR    GColorBlack
+  #define SIDEBAR_BG_COLOR GColorWhite
 #endif
 
-#define WIDGET_0 batteryMeterWidget
-#define WIDGET_1 btDisconnectWidget
-#define WIDGET_2 dateWidget
+// Battery Pos
+#define BATTERY_VERTICA_POS 8
 
-#define V_PADDING_DEFAULT 8
+// Bt disconnect/connect indicator pos
+#define BT_INDICATOR_VERTICAL_POS 52
+
+// Day indicator Pos
+#define DAY_VERTICAL_POS 138

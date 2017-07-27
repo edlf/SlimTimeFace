@@ -4,8 +4,6 @@
 #include <pebble-fctx/ffont.h>
 #include "clock_area.h"
 
-#define ROUND_VERTICAL_PADDING 15
-
 char time_hours[3];
 char time_minutes[3];
 

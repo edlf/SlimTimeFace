@@ -9,38 +9,49 @@ static Layer* layer_window;
 // current bluetooth state
 static bool bt_connected;
 
-void update_clock() {
+void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  switch (units_changed) {
+    // just in case
+    default:
+    case DAY_UNIT:
+      day_redraw(tick_time);
+      hour_redraw(tick_time);
+      minute_redraw(tick_time);
+      break;
+
+    case HOUR_UNIT:
+      hour_redraw(tick_time);
+      minute_redraw(tick_time);
+      break;
+
+    case MINUTE_UNIT:
+      minute_redraw(tick_time);
+      break;
+
+    case SECOND_UNIT:
+      break;
+  }
+}
+
+// forces everything on screen to be redrawn
+void redraw_screen() {
+  window_set_background_color(window_main, TIME_BG_COLOR);
+
+  // get current time since this is not a tick event
   time_t rawTime;
   struct tm* timeInfo;
 
   time(&rawTime);
   timeInfo = localtime(&rawTime);
 
-  watch_face_update_time(timeInfo);
-}
+  // redraw the clock
+  hour_redraw(timeInfo);
+  minute_redraw(timeInfo);
 
-void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_clock();
-
-  // redraw icons if day has changed
-  if (units_changed == DAY_UNIT) {
-    icons_redraw();
-  }
-
-  // since we get called every minute tick, update the clock
-  clock_redraw();
-}
-
-/* forces everything on screen to be redrawn -- perfect for keeping track of settings! */
-void redraw_screen() {
-  window_set_background_color(window_main, TIME_BG_COLOR);
-
-  // maybe the language changed!
-  update_clock();
-
-  // update the sidebar
-  icons_redraw();
-  clock_redraw();
+  // redraw the icons
+  battery_icon_redraw();
+  bluetooth_icon_redraw();
+  day_redraw(timeInfo);
 }
 
 static void main_window_load(Window *window) {
@@ -72,12 +83,12 @@ void bluetooth_state_changed_callback(bool newConnectionState) {
 
   bt_connected = newConnectionState;
 
-  icons_redraw();
+  bluetooth_icon_redraw();
 }
 
 // force the sidebar to redraw any time the battery state changes
 void battery_state_changed_callback(BatteryChargeState charge_state) {
-  icons_redraw();
+  battery_icon_redraw();
 }
 
 // fixes for disappearing elements after notifications

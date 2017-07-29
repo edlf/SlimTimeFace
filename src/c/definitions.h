@@ -13,14 +13,5 @@
   #define TIME_BG_COLOR    GColorWhite
 #endif
 
-// Battery Pos 8 - 5
-#define BATTERY_HORIZONAL_POS 3
-#define BATTERY_VERTICAL_POS  3
-
-// Bt disconnect/connect indicator pos
-#define BT_INDICATOR_HORIZONTAL_POS 3
-#define BT_INDICATOR_VERTICAL_POS   27
-
-// Day indicator Pos
-#define DAY_HORIZONTAL_POS -5
-#define DAY_VERTICAL_POS   138
+#define HOUR_FONT_SIZE   80
+#define MINUTE_FONT_SIZE 70

@@ -10,8 +10,3 @@ Sorry this is supposed to be a non configurable watch face without any extra fri
 
 ## Want to try it?
 You must sideload it, since it is not on the Pebble store. A build is available on the releases page. You can also use Gadgetbridge to install it.
-
-## TODO
- * Each icon should have each on layer to prevent useless updates to other icons
- * Remove all divisions from the code
- * Change font

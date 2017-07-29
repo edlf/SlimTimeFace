@@ -7,7 +7,9 @@
 // "public" functions
 void watch_face_init(Window*);
 void watch_face_deinit();
-void watch_face_update_time(struct tm*);
 
-void clock_redraw();
-void icons_redraw();
+void hour_redraw(struct tm*);
+void minute_redraw(struct tm*);
+void battery_icon_redraw();
+void bluetooth_icon_redraw();
+void day_redraw(struct tm*);
